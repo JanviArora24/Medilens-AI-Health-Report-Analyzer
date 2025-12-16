@@ -58,3 +58,45 @@ Users can upload medical PDF reports, receive AI-generated explanations, and int
 - 🤖 Google Gemini API (LLM)
 - 🚄 Deployed on Railway
 
+---
+
+## 📸 Screenshots
+
+### 📄 Upload Medical Report & AI Summary
+Upload a medical report PDF and get an AI-generated simplified summary.
+![Upload & AI Summary](medilens_screenshot/medilens9.png)
+
+### 🧪 Health Indicators & Abnormal Values
+Automatically detected abnormal test values with clear indicators.
+![Health Indicators](medilens_screenshot/medilens4.png)
+
+### 📊 Health Insights & Visual Explanation
+Detailed health insights presented in an easy-to-understand format.
+![Health Insights](medilens_screenshot/medilens5.png)
+
+### 💬 Chat with AI (Follow-up Questions)
+Ask personalized follow-up questions and get context-aware AI responses.
+![Chat with AI](medilens_screenshot/medilens6.png)
+
+---
+
+## ⭐ Acknowledgements
+
+- Inspired by real-world healthcare challenges and AI-powered applications.
+- Thanks to open-source tools and frameworks that made this project possible.
+
+---
+
+## 📌 Future Improvements
+
+- User authentication and personalized report history
+- Support for more medical report formats
+- Enhanced visual analytics & dashboards
+- Doctor-mode recommendations
+- Multilingual expansion
+- Improved AI accuracy with fine-tuning
+
+---
+
+⭐ If you find this project useful, feel free to star the repository!
+
