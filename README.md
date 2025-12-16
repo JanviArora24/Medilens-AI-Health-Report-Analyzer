@@ -98,5 +98,15 @@ Ask personalized follow-up questions and get context-aware AI responses.
 
 ---
 
-⭐ If you find this project useful, feel free to star the repository!
+## 👋 Connect with Me
+
+I’m always open to feedback, collaboration, and opportunities in software engineering and AI-driven development.
+
+- **Author:** Janvi Arora  
+- **GitHub:** https://github.com/JanviArora24  
+- **LinkedIn:** https://www.linkedin.com/in/janvi-arora-7b8299294/
+
+---
+
+⭐ If you enjoyed this project, don’t forget to star the repository!
 
