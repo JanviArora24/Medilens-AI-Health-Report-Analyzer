@@ -1,5 +1,7 @@
 import { useState } from "react";
 
+const BASE_URL = process.env.REACT_APP_BACKEND_URL;
+
 const SUGGESTED_QUESTIONS = [
   "Why are some values abnormal?",
   "What lifestyle changes should I follow?",
@@ -18,8 +20,8 @@ export default function ChatSection({ reportId }) {
     if (!text.trim()) return;
 
     if (!reportId) {
-      setMessages([
-        ...messages,
+      setMessages((prev) => [
+        ...prev,
         { role: "ai", text: "⚠️ Please analyze a report first." },
       ]);
       return;
@@ -31,7 +33,7 @@ export default function ChatSection({ reportId }) {
     setLoading(true);
 
     try {
-      const res = await fetch("http://localhost:8000/analyze/chat", {
+      const res = await fetch(`${BASE_URL}/analyze/chat`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
@@ -40,24 +42,28 @@ export default function ChatSection({ reportId }) {
         }),
       });
 
+      if (!res.ok) {
+        throw new Error("Chat API failed");
+      }
+
       const data = await res.json();
 
       setMessages([
         ...updated,
         { role: "ai", text: data.reply || "No response received." },
       ]);
-    } catch {
+    } catch (err) {
+      console.error(err);
       setMessages([
         ...updated,
         { role: "ai", text: "⚠️ Something went wrong. Try again." },
       ]);
+    } finally {
+      setLoading(false);
     }
-
-    setLoading(false);
   }
 
   return (
-    /* 👇 yahi main fix hai */
     <div className="mt-6 sm:mt-10 bg-white dark:bg-slate-800 rounded-xl shadow flex flex-col h-[75vh] sm:h-[600px]">
       {/* HEADER */}
       <div className="p-3 border-b dark:border-slate-700 font-semibold">

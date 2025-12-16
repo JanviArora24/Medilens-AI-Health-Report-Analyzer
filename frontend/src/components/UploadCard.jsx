@@ -1,5 +1,7 @@
 import { useState } from "react";
 
+const BASE_URL = process.env.REACT_APP_BACKEND_URL;
+
 export default function UploadCard({ onReportReady }) {
   const [file, setFile] = useState(null);
   const [language, setLanguage] = useState("hinglish");
@@ -14,14 +16,24 @@ export default function UploadCard({ onReportReady }) {
     formData.append("file", file);
     formData.append("language", language.toLowerCase().trim());
 
-    const res = await fetch("http://localhost:8000/uploadfile/upload", {
-      method: "POST",
-      body: formData,
-    });
+    try {
+      const res = await fetch(`${BASE_URL}/uploadfile/upload`, {
+        method: "POST",
+        body: formData,
+      });
 
-    const data = await res.json();
-    onReportReady(data);
-    setLoading(false);
+      if (!res.ok) {
+        throw new Error("Backend request failed");
+      }
+
+      const data = await res.json();
+      onReportReady(data);
+    } catch (err) {
+      console.error("Upload error:", err);
+      alert("Backend not reachable. Please try again.");
+    } finally {
+      setLoading(false);
+    }
   }
 
   return (
