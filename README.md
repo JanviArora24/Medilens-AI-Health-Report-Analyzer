@@ -1,70 +1,60 @@
-# Getting Started with Create React App
+# 🩺 MediLens – AI Health Report Analyzer
 
-This project was bootstrapped with [Create React App](https://github.com/facebook/create-react-app).
+MediLens is a full-stack AI-powered web application that helps users understand medical reports in a simple and human-friendly way.  
+Users can upload medical PDF reports, receive AI-generated explanations, and interact with the report using a chat-based interface.
 
-## Available Scripts
+---
 
-In the project directory, you can run:
+## 🌐 Live Demo
 
-### `npm start`
+- **Frontend (Vercel)**  
+  https://medilens-ai-health-report-analyzer-dhdbheyn7.vercel.app
 
-Runs the app in the development mode.\
-Open [http://localhost:3000](http://localhost:3000) to view it in your browser.
+- **Backend (FastAPI – Railway)**  
+ Deployed on Railway
 
-The page will reload when you make changes.\
-You may also see any lint errors in the console.
+> ⚠️ **Note:**  
+> The live demo uses a limited API quota.  
+> If the AI analysis or chat does not respond due to API limits, please refer to the screenshots and feature descriptions below for a complete overview of the project.
 
-### `npm test`
+---
 
-Launches the test runner in the interactive watch mode.\
-See the section about [running tests](https://facebook.github.io/create-react-app/docs/running-tests) for more information.
+## ✨ Features
 
-### `npm run build`
+### 📄 Upload & Analyze Medical Reports
+- Upload medical report PDFs
+- Automatic extraction & AI-based analysis
+- Supports **English, Hindi & Hinglish**
 
-Builds the app for production to the `build` folder.\
-It correctly bundles React in production mode and optimizes the build for the best performance.
+### 📊 Health Insights & Visualizations
+- Highlights abnormal test values
+- Easy-to-understand medical summaries
+- Charts and visual indicators for better clarity
 
-The build is minified and the filenames include the hashes.\
-Your app is ready to be deployed!
+### 💬 Chat with AI
+- Ask follow-up questions about your report
+- Suggested health-related questions
+- Context-aware AI responses based on the uploaded report
 
-See the section about [deployment](https://facebook.github.io/create-react-app/docs/deployment) for more information.
+### 🌗 Light / Dark Mode
+- Toggle between Light and Dark themes
+- Fully responsive UI
+- Mobile-friendly design
 
-### `npm run eject`
+---
 
-**Note: this is a one-way operation. Once you `eject`, you can't go back!**
+## 🛠️ Tech Stack
 
-If you aren't satisfied with the build tool and configuration choices, you can `eject` at any time. This command will remove the single build dependency from your project.
+### Frontend
+- ⚛️ React (Create React App)
+- 🎨 Tailwind CSS
+- 🌐 JavaScript (Fetch API)
+- 🚀 Deployed on Vercel
 
-Instead, it will copy all the configuration files and the transitive dependencies (webpack, Babel, ESLint, etc) right into your project so you have full control over them. All of the commands except `eject` will still work, but they will point to the copied scripts so you can tweak them. At this point you're on your own.
+### Backend
+- ⚡ FastAPI (Python)
+- 🍃 MongoDB Atlas
+- 🧩 PyMongo
+- 🤖 Google Gemini API (LLM)
+- 🚄 Deployed on Railway
 
-You don't have to ever use `eject`. The curated feature set is suitable for small and middle deployments, and you shouldn't feel obligated to use this feature. However we understand that this tool wouldn't be useful if you couldn't customize it when you are ready for it.
-
-## Learn More
-
-You can learn more in the [Create React App documentation](https://facebook.github.io/create-react-app/docs/getting-started).
-
-To learn React, check out the [React documentation](https://reactjs.org/).
-
-### Code Splitting
-
-This section has moved here: [https://facebook.github.io/create-react-app/docs/code-splitting](https://facebook.github.io/create-react-app/docs/code-splitting)
-
-### Analyzing the Bundle Size
-
-This section has moved here: [https://facebook.github.io/create-react-app/docs/analyzing-the-bundle-size](https://facebook.github.io/create-react-app/docs/analyzing-the-bundle-size)
-
-### Making a Progressive Web App
-
-This section has moved here: [https://facebook.github.io/create-react-app/docs/making-a-progressive-web-app](https://facebook.github.io/create-react-app/docs/making-a-progressive-web-app)
-
-### Advanced Configuration
-
-This section has moved here: [https://facebook.github.io/create-react-app/docs/advanced-configuration](https://facebook.github.io/create-react-app/docs/advanced-configuration)
-
-### Deployment
-
-This section has moved here: [https://facebook.github.io/create-react-app/docs/deployment](https://facebook.github.io/create-react-app/docs/deployment)
-
-### `npm run build` fails to minify
-
-This section has moved here: [https://facebook.github.io/create-react-app/docs/troubleshooting#npm-run-build-fails-to-minify](https://facebook.github.io/create-react-app/docs/troubleshooting#npm-run-build-fails-to-minify)
