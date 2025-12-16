@@ -8,13 +8,12 @@ app = FastAPI(title="MediLens Backend")
 
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=[
-        "https://medilens-ai-health-report-analyzer.vercel.app"
-    ],
+    allow_origins=["*"],
     allow_credentials=True,
     allow_methods=["*"],
     allow_headers=["*"],
 )
+
 
 app.include_router(upload_router, prefix="/uploadfile")
 app.include_router(analyze_router, prefix="/analyze")
