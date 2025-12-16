@@ -1,0 +1,14 @@
+# Node
+node_modules/
+
+# Env
+.env
+.env.local
+.env.production
+
+# Logs
+*.log
+
+# OS
+.DS_Store
+Thumbs.db
