@@ -1,14 +1,17 @@
 import { useState } from "react";
+import { useAuth } from "../context/AuthContext";
 
 const BASE_URL = process.env.REACT_APP_BACKEND_URL;
 
 export default function UploadCard({ onReportReady }) {
+  const { isAuthenticated } = useAuth();
+
   const [file, setFile] = useState(null);
   const [language, setLanguage] = useState("hinglish");
   const [loading, setLoading] = useState(false);
 
   async function analyze() {
-    if (!file) return;
+    if (!file || !isAuthenticated) return;
 
     setLoading(true);
 
@@ -42,15 +45,23 @@ export default function UploadCard({ onReportReady }) {
         📄 Upload Medical Report
       </h2>
 
+      {!isAuthenticated && (
+        <div className="mb-4 p-3 rounded bg-yellow-100 dark:bg-yellow-900 text-sm text-yellow-800 dark:text-yellow-200">
+          Please login to upload and analyze reports.
+        </div>
+      )}
+
       <input
         type="file"
         accept=".pdf"
-        className="w-full text-sm"
+        disabled={!isAuthenticated}
+        className="w-full text-sm disabled:opacity-50"
         onChange={(e) => setFile(e.target.files[0])}
       />
 
       <select
-        className="block w-full mt-4 p-2 text-sm bg-slate-200 dark:bg-slate-700 rounded"
+        disabled={!isAuthenticated}
+        className="block w-full mt-4 p-2 text-sm bg-slate-200 dark:bg-slate-700 rounded disabled:opacity-50"
         value={language}
         onChange={(e) => setLanguage(e.target.value)}
       >
@@ -60,7 +71,7 @@ export default function UploadCard({ onReportReady }) {
       </select>
 
       <button
-        disabled={loading || !file}
+        disabled={loading || !file || !isAuthenticated}
         onClick={analyze}
         className="w-full mt-4 py-2 text-sm sm:text-base bg-blue-600 hover:bg-blue-700 text-white rounded disabled:opacity-50"
       >

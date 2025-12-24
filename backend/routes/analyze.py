@@ -1,17 +1,19 @@
-from fastapi import APIRouter, HTTPException
+from fastapi import APIRouter, HTTPException, Depends
 from pydantic import BaseModel
 from services.gemini_ai import chat_with_gemini
+from dependencies.auth import get_current_user
 
 router = APIRouter()
 
-# ✅ THIS WAS MISSING
 class ChatRequest(BaseModel):
     report_id: str
     question: str
 
-
 @router.post("/chat")
-async def chat_with_ai(req: ChatRequest):
+async def chat_with_ai(
+    req: ChatRequest,
+    user_id: str = Depends(get_current_user)   # 🔐 JWT
+):
     if not req.report_id or not req.question:
         raise HTTPException(status_code=400, detail="Missing fields")
 

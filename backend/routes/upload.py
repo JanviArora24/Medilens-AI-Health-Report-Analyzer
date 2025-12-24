@@ -1,9 +1,10 @@
-from fastapi import APIRouter, UploadFile, File, Form
+from fastapi import APIRouter, UploadFile, File, Form, Depends
 from lib.mongodb import reports_collection
 from services.pdf_parser import extract_text
 from services.gemini_ai import analyze_report
 from services.test_extractor import extract_tests
 from datetime import datetime
+from dependencies.auth import get_current_user
 import shutil, os
 
 router = APIRouter()
@@ -14,18 +15,16 @@ os.makedirs(UPLOAD_DIR, exist_ok=True)
 @router.post("/upload")
 async def upload_report(
     file: UploadFile = File(...),
-    language: str = Form(...)
+    language: str = Form(...),
+    user_id: str = Depends(get_current_user)   # 🔐 JWT
 ):
-
     file_path = os.path.join(UPLOAD_DIR, file.filename)
 
     with open(file_path, "wb") as f:
         shutil.copyfileobj(file.file, f)
 
     text = extract_text(file_path)
-    print("📌 LANGUAGE RECEIVED:", language)
 
-    # fallback summary (VERY IMPORTANT)
     summary = "Report uploaded successfully. Analysis unavailable."
     try:
         summary = analyze_report(text, language)
@@ -35,6 +34,7 @@ async def upload_report(
     tests = extract_tests(summary)
 
     report_doc = {
+        "user_id": user_id,                     # 🔐 LINK USER
         "filename": file.filename,
         "uploaded_at": datetime.utcnow(),
         "summary": summary,
