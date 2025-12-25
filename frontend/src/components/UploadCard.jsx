@@ -1,7 +1,7 @@
 import { useState } from "react";
 import { useAuth } from "../context/AuthContext";
+import api from "../services/api"; 
 
-const BASE_URL = process.env.REACT_APP_BACKEND_URL;
 
 export default function UploadCard({ onReportReady }) {
   const { isAuthenticated } = useAuth();
@@ -20,17 +20,9 @@ export default function UploadCard({ onReportReady }) {
     formData.append("language", language.toLowerCase().trim());
 
     try {
-      const res = await fetch(`${BASE_URL}/uploadfile/upload`, {
-        method: "POST",
-        body: formData,
-      });
+      const res = await api.post("/uploadfile/upload", formData);
 
-      if (!res.ok) {
-        throw new Error("Backend request failed");
-      }
-
-      const data = await res.json();
-      onReportReady(data);
+      onReportReady(res.data);
     } catch (err) {
       console.error("Upload error:", err);
       alert("Backend not reachable. Please try again.");

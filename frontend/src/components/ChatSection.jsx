@@ -1,6 +1,6 @@
 import { useState } from "react";
+import api from "../services/api"; 
 
-const BASE_URL = process.env.REACT_APP_BACKEND_URL;
 
 const SUGGESTED_QUESTIONS = [
   "Why are some values abnormal?",
@@ -33,24 +33,14 @@ export default function ChatSection({ reportId }) {
     setLoading(true);
 
     try {
-      const res = await fetch(`${BASE_URL}/analyze/chat`, {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({
-          report_id: reportId,
-          question: text,
-        }),
+      const res = await api.post("/analyze/chat", {
+        report_id: reportId,
+        question: text,
       });
-
-      if (!res.ok) {
-        throw new Error("Chat API failed");
-      }
-
-      const data = await res.json();
 
       setMessages([
         ...updated,
-        { role: "ai", text: data.reply || "No response received." },
+        { role: "ai", text: res.data.reply || "No response received." },
       ]);
     } catch (err) {
       console.error(err);
