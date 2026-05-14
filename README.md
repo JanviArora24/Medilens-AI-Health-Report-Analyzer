@@ -8,10 +8,10 @@ Users can upload medical PDF reports, receive AI-generated explanations, and int
 ## 🌐 Live Demo
 
 - **Frontend (Vercel)**  
-  https://medilens-ai-health-report-analyzer-dhdbheyn7.vercel.app
+  [https://medilens-ai-health-report-analyzer-dhdbheyn7.vercel.app](https://medilens-ai-health-report-analyzer.vercel.app)
 
-- **Backend (FastAPI – Railway)**  
- Deployed on Railway
+- **Backend (FastAPI – Vercel)**  
+ Deployed on Vercel
 
 > ⚠️ **Note:**  
 > The live demo uses a limited API quota.  
