@@ -10,8 +10,8 @@ Users can upload medical PDF reports, receive AI-generated explanations, and int
 - **Frontend (Vercel)**  
   [https://medilens-ai-health-report-analyzer-dhdbheyn7.vercel.app](https://medilens-ai-health-report-analyzer.vercel.app)
 
-- **Backend (FastAPI – Vercel)**  
- Deployed on Vercel
+- **Backend (FastAPI – Render)**  
+ Deployed on Render
 
 > ⚠️ **Note:**  
 > The live demo uses a limited API quota.  
@@ -56,7 +56,7 @@ Users can upload medical PDF reports, receive AI-generated explanations, and int
 - 🍃 MongoDB Atlas
 - 🧩 PyMongo
 - 🤖 Google Gemini API (LLM)
-- 🚄 Deployed on Railway
+- 🚄 Deployed on Render
 
 ---
 
