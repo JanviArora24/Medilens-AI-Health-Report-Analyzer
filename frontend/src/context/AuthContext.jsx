@@ -11,39 +11,45 @@ export const AuthProvider = ({ children }) => {
   // 🔄 Restore auth state on refresh
   useEffect(() => {
     const savedToken = localStorage.getItem("token");
-    if (savedToken) {
-      try {
-        const decoded = jwtDecode(savedToken);
+    if (!savedToken) return;
 
-        setToken(savedToken);
-        setUser({
-          email: decoded.email,
-          name: decoded.name,
-          userId: decoded.user_id,
-        });
-        setIsAuthenticated(true);
-      } catch (err) {
-        // Invalid / expired token
-        localStorage.removeItem("token");
-        setToken(null);
-        setUser(null);
-        setIsAuthenticated(false);
-      }
+    try {
+      const decoded = jwtDecode(savedToken);
+
+      setToken(savedToken);
+      setUser({
+        email: decoded.email,
+        name: decoded.name,
+        userId: decoded.user_id,
+      });
+      setIsAuthenticated(true);
+    } catch (err) {
+      // ❌ Corrupt / expired token
+      console.warn("Invalid token, clearing auth state");
+      localStorage.removeItem("token");
+      setToken(null);
+      setUser(null);
+      setIsAuthenticated(false);
     }
   }, []);
 
   // 🔐 Login handler
   const login = (jwt) => {
-    const decoded = jwtDecode(jwt);
+    try {
+      const decoded = jwtDecode(jwt);
 
-    localStorage.setItem("token", jwt);
-    setToken(jwt);
-    setUser({
-      email: decoded.email,
-      name: decoded.name,
-      userId: decoded.user_id,
-    });
-    setIsAuthenticated(true);
+      localStorage.setItem("token", jwt);
+      setToken(jwt);
+      setUser({
+        email: decoded.email,
+        name: decoded.name,
+        userId: decoded.user_id,
+      });
+      setIsAuthenticated(true);
+    } catch (err) {
+      console.error("Failed to decode JWT", err);
+      logout();
+    }
   };
 
   // 🚪 Logout handler

@@ -3,7 +3,7 @@ from schemas.user import UserRegister, UserLogin
 from core.security import hash_password, verify_password, create_access_token
 from lib.mongodb import users_collection
 
-router = APIRouter(prefix="/auth", tags=["Auth"])
+router = APIRouter(tags=["Auth"])
 
 @router.post("/register")
 def register(user: UserRegister):
@@ -29,7 +29,7 @@ def login(user: UserLogin):
     token = create_access_token({
         "user_id": str(db_user["_id"]),
         "email": db_user["email"],
-        "name": db_user["name"]  # 👈 NAME ADDED
+        "name": db_user["name"]
     })
 
     return {

@@ -12,7 +12,7 @@ class ChatRequest(BaseModel):
 @router.post("/chat")
 async def chat_with_ai(
     req: ChatRequest,
-    user_id: str = Depends(get_current_user)   # 🔐 JWT
+    current_user: dict = Depends(get_current_user)   # 🔐 JWT
 ):
     if not req.report_id or not req.question:
         raise HTTPException(status_code=400, detail="Missing fields")

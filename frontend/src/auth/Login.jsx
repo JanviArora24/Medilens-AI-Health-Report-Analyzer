@@ -10,6 +10,10 @@ const Login = ({ onSuccess, switchToRegister }) => {
 
   const handleSubmit = async (e) => {
     e.preventDefault();
+
+     // 🔥 CLEAR OLD TOKEN (IMPORTANT)
+     localStorage.removeItem("token");
+
     setError("");
     setLoading(true);
 

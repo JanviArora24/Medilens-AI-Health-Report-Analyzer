@@ -16,7 +16,9 @@ export default function Navbar({ activeTab, setActiveTab }) {
 
   const tabs = [
     { id: "summary", label: "Upload & Summary" },
+    { id: "myreports", label: "My Reports" },
     { id: "insights", label: "Health Insights" },
+    { id: "trends", label: "Health Trends" },
     { id: "chat", label: "Chat with AI" },
   ];
 

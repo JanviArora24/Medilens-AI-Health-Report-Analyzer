@@ -16,5 +16,11 @@ if not DB_NAME:
 client = MongoClient(MONGO_URI)
 db = client[DB_NAME]
 
-reports_collection = db["reports"]
 users_collection = db["users"]
+reports_collection = db["reports"]
+
+# 🔥 Optional 
+reports_collection.create_index(
+    [("user_id", 1), ("file_hash", 1), ("language", 1)],
+    unique=False
+)

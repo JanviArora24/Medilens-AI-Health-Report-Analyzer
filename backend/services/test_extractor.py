@@ -1,67 +1,155 @@
 import re
+from datetime import datetime
 
+
+# ------------------------------
+# 🔢 Extract single numeric value
+# ------------------------------
+def _extract_number(text):
+    if not text:
+        return None
+
+    m = re.search(r"(\d+(\.\d+)?)", text)
+    return float(m.group(1)) if m else None
+
+
+# ---------------------------------
+# 🔢 Extract normal range (ROBUST)
+# ---------------------------------
+def _extract_range(text):
+    if not text:
+        return (None, None)
+
+    text = text.lower()
+
+    m = re.search(r"(\d+\.?\d*)\s*[-–]\s*(\d+\.?\d*)", text)
+    if m:
+        return float(m.group(1)), float(m.group(2))
+
+    m = re.search(r"(\d+\.?\d*)\s*se\s*(\d+\.?\d*)", text)
+    if m:
+        return float(m.group(1)), float(m.group(2))
+
+    m = re.search(r"(less than|below|under|upto|up to)\s*(\d+\.?\d*)", text)
+    if m:
+        return None, float(m.group(2))
+
+    m = re.search(r"(greater than|above|more than)\s*(\d+\.?\d*)", text)
+    if m:
+        return float(m.group(2)), None
+
+    m = re.search(r"<\s*(\d+\.?\d*)", text)
+    if m:
+        return None, float(m.group(1))
+
+    m = re.search(r">\s*(\d+\.?\d*)", text)
+    if m:
+        return float(m.group(1)), None
+
+    return (None, None)
+
+
+# ---------------------------------
+# 📅 Extract REPORT DATE
+# ---------------------------------
+# ---------------------------------
+# 📅 Extract REPORT DATE (ROBUST)
+# ---------------------------------
+def extract_report_date(text):
+
+    if not text:
+        return None
+
+    text = text.replace("\n", " ")
+
+    # First try keywords
+    keyword_patterns = [
+        r"Reported.*?(\d{1,2}[/-]\d{1,2}[/-]\d{4})",
+        r"Collected.*?(\d{1,2}[/-]\d{1,2}[/-]\d{4})",
+        r"Report\s*Date.*?(\d{1,2}[/-]\d{1,2}[/-]\d{4})",
+    ]
+
+    for pattern in keyword_patterns:
+
+        m = re.search(pattern, text, re.IGNORECASE)
+
+        if m:
+            date_str = m.group(1)
+
+            for fmt in ("%d/%m/%Y", "%d-%m-%Y"):
+
+                try:
+                    return datetime.strptime(date_str, fmt)
+                except:
+                    pass
+
+    # -------------------------
+    # FALLBACK
+    # -------------------------
+
+    all_dates = re.findall(
+        r"\d{1,2}[/-]\d{1,2}[/-]\d{4}",
+        text
+    )
+
+    for d in all_dates:
+
+        for fmt in ("%d/%m/%Y", "%d-%m-%Y"):
+
+            try:
+                return datetime.strptime(d, fmt)
+            except:
+                pass
+
+    return None
+
+
+# ---------------------------------
+# 🧠 Extract tests from AI summary
+# ---------------------------------
 def extract_tests(summary_text: str):
     tests = []
-
     if not summary_text:
         return tests
 
-    # Split per test block
     blocks = re.split(r"•\s*Test Name\s*:", summary_text)
 
-    for block in blocks:
-        block = block.strip()
-        if not block:
+    for block in blocks[1:]:
+        lines = [l.strip() for l in block.split("\n") if l.strip()]
+        if not lines:
             continue
 
-        # ---- NAME ----
-        name_match = re.match(r"([A-Za-z ()⁺³\/\-]+)", block)
-        if not name_match:
-            continue
-        name = name_match.group(1).strip()
+        name = lines[0]
 
-        # ---- NORMAL RANGE ----
-        normal_match = re.search(r"Normal Range:\s*([^\n]+)", block)
-        normal_range = normal_match.group(1).strip() if normal_match else ""
-
-        # ---- VALUE ----
-        value_match = re.search(r"Your Value:\s*([^\n]+)", block)
-        value = value_match.group(1).strip() if value_match else ""
-
-        # ---- STATUS ----
-        status_match = re.search(r"Status:\s*([A-Za-z ]+)", block)
-        status = status_match.group(1).strip().title() if status_match else "Normal"
-
-        # ---- CAUSE (ONLY IF ABNORMAL) ----
+        value_text = ""
+        range_text = ""
+        status = "Normal"
         cause = ""
-        if status.lower() in ["low", "high", "borderline", "borderline high"]:
-            cause_match = re.search(
-                r"(Possible Cause|Iska Karan|Cause):\s*([^\n]+)",
-                block,
-                re.IGNORECASE
-            )
-            if cause_match:
-                cause = cause_match.group(2).strip()
-
-        # ---- TIPS (ONLY IF ABNORMAL) ----
         tips = []
-        if status.lower() in ["low", "high", "borderline", "borderline high"]:
-            tips_section = re.search(
-                r"Lifestyle tips.*?:([\s\S]+)",
-                block,
-                re.IGNORECASE
-            )
-            if tips_section:
-                tips = [
-                    t.strip("• ").strip()
-                    for t in tips_section.group(1).split("\n")
-                    if t.strip()
-                ]
+
+        for l in lines:
+            low = l.lower()
+            if "your value" in low:
+                value_text = l
+            elif "normal range" in low:
+                range_text = l
+            elif "status" in low:
+                status = l.split(":", 1)[-1].strip().title()
+            elif "possible cause" in low or "iska karan" in low:
+                cause = l.split(":", 1)[-1].strip()
+            elif "tips" in low:
+                tips.append(l.split(":", 1)[-1].strip())
+
+        value_numeric = _extract_number(value_text)
+        normal_min, normal_max = _extract_range(range_text)
 
         tests.append({
             "name": name,
-            "value": value,
-            "normal_range": normal_range,
+            "value_text": value_text,
+            "normal_range_text": range_text,
+            "value_numeric": value_numeric,
+            "normal_min": normal_min,
+            "normal_max": normal_max,
             "status": status,
             "cause": cause,
             "tips": tips

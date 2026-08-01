@@ -1,6 +1,8 @@
 import { normalizeStatus } from "../utils/statusUtils";
 
 export default function HealthOverview({ tests }) {
+  if (!tests?.length) return null;
+
   return (
     <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 mt-6">
       {tests.map((t, i) => {
@@ -15,14 +17,16 @@ export default function HealthOverview({ tests }) {
 
         return (
           <div key={i} className={`p-4 rounded-xl border-l-4 ${color}`}>
-            <h3 className="font-semibold text-sm sm:text-base">{t.name}</h3>
+            <h3 className="font-semibold text-sm sm:text-base">
+              {t.name}
+            </h3>
 
             <p className="text-xs sm:text-sm opacity-80">
-              Your Value: <b>{t.value}</b>
+              {t.value_text || "Your Value: —"}
             </p>
 
             <p className="text-xs sm:text-sm opacity-80">
-              Normal Range: {t.normal_range}
+              {t.normal_range_text || "Normal Range: —"}
             </p>
 
             <p className="mt-1 font-bold text-xs sm:text-sm">
