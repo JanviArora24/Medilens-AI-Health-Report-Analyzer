@@ -87,4 +87,4 @@ pytesseract==0.3.13
 Pillow==11.3.0
 pdf2image==1.17.0
 opencv-python==4.12.0.88
-numpy==2.3.2
+numpy==2.2.6
