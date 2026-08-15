@@ -10,11 +10,26 @@ import shutil
 import hashlib
 import uuid
 import os
+import time
+
 
 router = APIRouter()
 
 UPLOAD_DIR = "uploaded_files"
 os.makedirs(UPLOAD_DIR, exist_ok=True)
+
+# -------------------------------------------------------
+# CONSTANTS
+# -------------------------------------------------------
+
+MAX_FILE_SIZE = 10 * 1024 * 1024  # 10 MB
+
+ALLOWED_EXTENSIONS = {
+    ".pdf",
+    ".png",
+    ".jpg",
+    ".jpeg"
+}
 
 
 # -------------------------------------------------------
@@ -28,10 +43,90 @@ def calculate_file_hash(file_path: str):
     with open(file_path, "rb") as f:
 
         for chunk in iter(lambda: f.read(4096), b""):
-
             sha256.update(chunk)
 
     return sha256.hexdigest()
+
+
+# -------------------------------------------------------
+# FILE SIZE VALIDATION + SAVE
+# -------------------------------------------------------
+
+def save_file_with_limit(upload_file, file_path):
+
+    total_size = 0
+
+    with open(file_path, "wb") as buffer:
+
+        while True:
+
+            chunk = upload_file.file.read(1024 * 1024)  # 1 MB
+
+            if not chunk:
+                break
+
+            total_size += len(chunk)
+
+            # Reject files larger than 10 MB
+            if total_size > MAX_FILE_SIZE:
+
+                raise HTTPException(
+                    status_code=413,
+                    detail="File size must not exceed 10 MB."
+                )
+
+            buffer.write(chunk)
+
+    # Empty file validation
+    if total_size == 0:
+
+        raise HTTPException(
+            status_code=400,
+            detail="Uploaded file is empty."
+        )
+
+    return total_size
+
+
+# -------------------------------------------------------
+# FILE SIGNATURE VALIDATION
+# -------------------------------------------------------
+
+def validate_file_signature(file_path: str, extension: str):
+
+    with open(file_path, "rb") as f:
+
+        header = f.read(16)
+
+    # PDF
+    if extension == ".pdf":
+
+        if not header.startswith(b"%PDF"):
+
+            raise HTTPException(
+                status_code=400,
+                detail="Invalid or corrupted PDF file."
+            )
+
+    # PNG
+    elif extension == ".png":
+
+        if header[:8] != b"\x89PNG\r\n\x1a\n":
+
+            raise HTTPException(
+                status_code=400,
+                detail="Invalid or corrupted PNG file."
+            )
+
+    # JPEG
+    elif extension in [".jpg", ".jpeg"]:
+
+        if not header.startswith(b"\xff\xd8\xff"):
+
+            raise HTTPException(
+                status_code=400,
+                detail="Invalid or corrupted JPEG file."
+            )
 
 
 # -------------------------------------------------------
@@ -49,21 +144,26 @@ async def upload_report(
 
 ):
 
-    allowed_extensions = [
+    start_time = time.perf_counter()
 
-        ".pdf",
+    # -------------------------------------------------------
+    # FILE NAME VALIDATION
+    # -------------------------------------------------------
 
-        ".png",
+    if not file.filename:
 
-        ".jpg",
+        raise HTTPException(
+            status_code=400,
+            detail="No file was provided."
+        )
 
-        ".jpeg"
-
-    ]
+    # -------------------------------------------------------
+    # EXTENSION VALIDATION
+    # -------------------------------------------------------
 
     extension = os.path.splitext(file.filename)[1].lower()
 
-    if extension not in allowed_extensions:
+    if extension not in ALLOWED_EXTENSIONS:
 
         raise HTTPException(
 
@@ -90,18 +190,43 @@ async def upload_report(
     try:
 
         # -------------------------------------------------------
-        # SAVE FILE
+        # SAVE FILE WITH 10 MB LIMIT
         # -------------------------------------------------------
 
-        with open(file_path, "wb") as buffer:
+        file_size = save_file_with_limit(
 
-            shutil.copyfileobj(file.file, buffer)
+            file,
+
+            file_path
+
+        )
+
+        print(
+            f"Uploaded file size: "
+            f"{file_size / (1024 * 1024):.2f} MB"
+        )
+
+        # -------------------------------------------------------
+        # FILE SIGNATURE / CORRUPTION VALIDATION
+        # -------------------------------------------------------
+
+        validate_file_signature(
+
+            file_path,
+
+            extension
+
+        )
 
         # -------------------------------------------------------
         # HASH
         # -------------------------------------------------------
 
-        file_hash = calculate_file_hash(file_path)
+        file_hash = calculate_file_hash(
+
+            file_path
+
+        )
 
         # -------------------------------------------------------
         # DUPLICATE CHECK
@@ -119,22 +244,25 @@ async def upload_report(
 
         if existing:
 
+            processing_time = (
+                time.perf_counter() - start_time
+            )
+
+            print(
+                f"Duplicate report reused in "
+                f"{processing_time:.2f} seconds"
+            )
+
             reports_collection.update_one(
 
                 {
-
                     "_id": existing["_id"]
-
                 },
 
                 {
-
                     "$set": {
-
                         "updated_at": datetime.utcnow()
-
                     }
-
                 }
 
             )
@@ -155,31 +283,44 @@ async def upload_report(
         # OCR / TEXT EXTRACTION
         # -------------------------------------------------------
 
-        extracted_text = extract_text(file_path)
+        extracted_text = extract_text(
 
-        print("\n========== OCR TEXT ==========\n")
+            file_path
 
-        print(extracted_text[:3000])
+        )
 
-        print("\n==============================\n")
+        print(
+            "\n========== OCR TEXT ==========\n"
+        )
 
-        print("Text Length :", len(extracted_text))
+        print(
+            extracted_text[:3000]
+        )
 
-        print("\n========== FIRST 1000 CHARACTERS ==========\n")
-        print(extracted_text[:1000])
-        print("\n===========================================\n")
+        print(
+            "\n==============================\n"
+        )
+
+        print(
+            "Text Length :",
+            len(extracted_text)
+        )
 
         # -------------------------------------------------------
-        # VALIDATION
+        # TEXT VALIDATION
         # -------------------------------------------------------
 
-        if not extracted_text.strip():
+        if not extracted_text or not extracted_text.strip():
 
             raise HTTPException(
 
                 status_code=400,
 
-                detail="Unable to extract text from the uploaded report."
+                detail=(
+                    "Unable to extract text from the uploaded "
+                    "report. The file may be empty, corrupted, "
+                    "or contain no readable text."
+                )
 
             )
 
@@ -193,7 +334,10 @@ async def upload_report(
 
         )
 
-        print("Report Date :", report_date)
+        print(
+            "Report Date :",
+            report_date
+        )
 
         # -------------------------------------------------------
         # GEMINI AI ANALYSIS
@@ -217,11 +361,17 @@ async def upload_report(
 
             )
 
-        print("\n========== AI SUMMARY ==========\n")
+        print(
+            "\n========== AI SUMMARY ==========\n"
+        )
 
-        print(ai_summary[:1500])
+        print(
+            ai_summary[:1500]
+        )
 
-        print("\n================================\n")
+        print(
+            "\n================================\n"
+        )
 
         # -------------------------------------------------------
         # TEST EXTRACTION
@@ -233,7 +383,9 @@ async def upload_report(
 
         )
 
-        print(f"Tests Extracted : {len(tests)}")
+        print(
+            f"Tests Extracted : {len(tests)}"
+        )
 
         # -------------------------------------------------------
         # STORE IN DATABASE
@@ -246,6 +398,8 @@ async def upload_report(
             "report_name": file.filename,
 
             "file_hash": file_hash,
+
+            "file_size": file_size,
 
             "language": language,
 
@@ -269,7 +423,27 @@ async def upload_report(
 
         )
 
-        print("Saved Report :", result.inserted_id)
+        # -------------------------------------------------------
+        # PROCESSING TIME
+        # -------------------------------------------------------
+
+        processing_time = (
+            time.perf_counter() - start_time
+        )
+
+        print(
+            f"\nProcessing Time: "
+            f"{processing_time:.2f} seconds"
+        )
+
+        print(
+            "Saved Report :",
+            result.inserted_id
+        )
+
+        # -------------------------------------------------------
+        # RESPONSE
+        # -------------------------------------------------------
 
         return {
 
@@ -281,7 +455,12 @@ async def upload_report(
 
             "report_date": report_date,
 
-            "reused": False
+            "reused": False,
+
+            "processing_time_seconds": round(
+                processing_time,
+                2
+            )
 
         }
 
@@ -291,13 +470,16 @@ async def upload_report(
 
     except Exception as e:
 
-        print("UPLOAD ERROR :", str(e))
+        print(
+            "UPLOAD ERROR :",
+            str(e)
+        )
 
         raise HTTPException(
 
             status_code=500,
 
-            detail=str(e)
+            detail="Failed to process the uploaded report."
 
         )
 
